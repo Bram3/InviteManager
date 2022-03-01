@@ -72,7 +72,7 @@ export class AppDiscord {
 
     if (!usedInvite) {
       this.logger.info(
-        `${member.displayName} joined ${member.guild.name}. (Invited by: unkown)`
+        `${member.displayName} joined ${member.guild.name}. (Invited by: unknown)`
       );
       if (config.welcomeMessage) {
         const channel = this.client.channels.cache.get(
