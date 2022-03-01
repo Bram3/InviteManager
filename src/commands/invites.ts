@@ -7,12 +7,11 @@ import config from '../config'
 import { CommandErrorHandler } from '../guards/commandError'
 
 @Discord()
-@injectable()
 @SlashGroup({
   name: 'invites',
   description: 'Lets you add, remove, reset, or see invites.',
 })
-@SlashGroup('invites')
+@singleton()
 @Guard(CommandErrorHandler)
 export class AppDiscord {
   constructor(
@@ -70,6 +69,7 @@ export class AppDiscord {
   @Slash('show', {
     description: 'Shows you the amount of invites someone has.',
   })
+  @SlashGroup('invites')
   async show(
     @SlashOption('member', {
       type: 'USER',
@@ -108,6 +108,7 @@ export class AppDiscord {
   }
 
   @Slash('add', { description: 'Add invites to a member.' })
+  @SlashGroup('invites')
   async add(
     @SlashOption('member', {
       type: 'USER',
@@ -149,6 +150,7 @@ export class AppDiscord {
   }
 
   @Slash('remove', { description: 'Remove invites from a member.' })
+  @SlashGroup('invites')
   async remove(
     @SlashOption('member', {
       type: 'USER',
@@ -200,6 +202,7 @@ export class AppDiscord {
   @Slash('reset', {
     description: 'Remove all invites from the mentioned member.',
   })
+  @SlashGroup('invites')
   async reset(
     @SlashOption('member', {
       type: 'USER',
@@ -247,6 +250,7 @@ export class AppDiscord {
   @Slash('leaderboard', {
     description: 'Sends a list of the top ten inviters.',
   })
+  @SlashGroup('invites')
   async leaderboard(interaction: CommandInteraction) {
     const all = await this.invites.findAll({
       order: [['invites', 'DESC']],
