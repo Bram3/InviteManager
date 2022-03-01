@@ -6,11 +6,10 @@ import ms from 'ms'
 import { CommandErrorHandler } from '../guards/commandError'
 
 @Discord()
-@injectable()
+@singleton()
 @Guard(CommandErrorHandler)
 export class AppDiscord {
   constructor(@inject(Client) private client: Client) {}
-
   @Slash('uptime', { description: 'Sends the uptime of the bot.' })
   uptime(interaction: CommandInteraction): void {
     let embed = new MessageEmbed()
