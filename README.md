@@ -18,9 +18,10 @@ A unbranded discord bot that keeps tracks of invites and is written in TypeScrip
 
 ## How to host
 
-### Node 
+### Node
 
 Clone the repo:
+
 ```
 git clone https://github.com/Bram3/InviteManager
 ```
@@ -28,6 +29,7 @@ git clone https://github.com/Bram3/InviteManager
 Edit the config (./src/config.ts)
 
 Create a `.env` file with these fields:
+
 ```
 TOKEN=
 GUILD_ID=
@@ -40,11 +42,13 @@ DB_HOST=
 ```
 
 Compile TypesScript to JavaScript:
+
 ```
 npm run build
 ```
 
 Start the bot:
+
 ```
 npm run start
 ```
@@ -52,11 +56,13 @@ npm run start
 ### PM2
 
 Install PM2:
+
 ```
 npm i -g pm2 --save-dev
 ```
 
 Clone the repo:
+
 ```
 git clone https://github.com/Bram3/InviteManager
 ```
@@ -64,6 +70,7 @@ git clone https://github.com/Bram3/InviteManager
 Edit the config (./src/config.ts)
 
 Create a `.env` file with these fields:
+
 ```
 TOKEN=
 GUILD_ID=
@@ -76,19 +83,23 @@ DB_HOST=
 ```
 
 Compile TypesScript to JavaScript:
+
 ```
 npm run build
 ```
 
 Start the bot:
+
 ```
 pm2 start ./build/index.js
 ```
 
 ### Docker
+
 Install docker: https://docs.docker.com/engine/install/
 
 Clone the repo:
+
 ```
 git clone https://github.com/Bram3/InviteManager
 ```
@@ -96,18 +107,21 @@ git clone https://github.com/Bram3/InviteManager
 Edit the config (./src/config.ts)
 
 Build the image:
+
 ```
 docker build . -t bram3/invitemanager
 ```
 
 Start the image:
-```
-docker run -it 
-\ -e TOKEN="" 
+
+````
+docker run -it
+\ -e TOKEN=""
 \ -e CLIENT_ID=""
-\ -e DB_USER="" 
-\ -e DB_PASSWORD="" 
-\ -e DB_NAME="" 
-\ -e DB_PORT="" 
-\ -e DB_HOST="" 
+\ -e DB_USER=""
+\ -e DB_PASSWORD=""
+\ -e DB_NAME=""
+\ -e DB_PORT=""
+\ -e DB_HOST=""
 \ bram3/invitemanager ```
+````

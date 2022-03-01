@@ -1,16 +1,10 @@
-import { ArgsOf, GuardFunction } from "discordx";
-import { container } from "tsyringe";
-import { Logger } from "winston";
-import { Beans } from "../DI/Beans";
+import {ArgsOf, GuardFunction} from 'discordx';
+import {container} from 'tsyringe';
+import {Logger} from 'winston';
+import {Beans} from '../DI/Beans';
 
 export const EventErrorHandler: GuardFunction<
-  ArgsOf<
-    | "guildMemberAdd"
-    | "guildMemberRemove"
-    | "inviteCreate"
-    | "inviteDelete"
-    | "ready"
-  >
+  ArgsOf<'guildMemberAdd' | 'guildMemberRemove' | 'inviteCreate' | 'inviteDelete' | 'ready'>
 > = async (_, __, next) => {
   try {
     await next();
