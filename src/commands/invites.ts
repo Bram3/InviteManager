@@ -7,6 +7,7 @@ import config from '../config'
 import { CommandErrorHandler } from '../guards/commandError'
 
 @Discord()
+@injectable()
 @SlashGroup({
   name: 'invites',
   description: 'Lets you add, remove, reset, or see invites.',
