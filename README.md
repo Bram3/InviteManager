@@ -12,9 +12,9 @@ A unbranded discord bot that keeps tracks of invites and is written in TypeScrip
 
 ## Requirements
 
-- [a Node.js v17.6 or higher](https://nodejs.org/en/download/)
-- TypeScript (`yarn add global typescript or npm i -g typescript`) 
-- [a A Postgresql database](https://www.postgresql.org/)
+- [Node.js v17.6 or higher](https://nodejs.org/en/download/)
+- [TpeScript](https://www.typescriptlang.org/download)
+- [Postgresql database](https://www.postgresql.org/)
 
 ## How to host
 
@@ -111,5 +111,3 @@ docker run -it
 \ -e DB_PORT="" 
 \ -e DB_HOST="" 
 \ bram3/invitemanager ```
-
-
