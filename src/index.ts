@@ -94,6 +94,12 @@ export default class Bot {
     })
     invites.sync()
 
+    DIService.container = container
+    container.registerInstance(Beans.Logger, this.logger)
+    container.registerInstance(Client, this.client)
+    container.registerInstance(Beans.Invites, invites)
+    container.registerInstance(Beans.GuildInvites, this.guildInvites)
+    
     this.client = new Client({
       botGuilds: [(client) => client.guilds.cache.map((guild) => guild.id)],
       intents: [
@@ -118,13 +124,8 @@ export default class Bot {
     if (!process.env.TOKEN) {
       throw Error('Could not find TOKEN in your environment')
     }
+    
     Bot.logger.info('Connecting...')
-
-    DIService.container = container
-    container.registerInstance(Beans.Logger, this.logger)
-    container.registerInstance(Client, this.client)
-    container.registerInstance(Beans.Invites, invites)
-    container.registerInstance(Beans.GuildInvites, this.guildInvites)
 
     await this.client.login(process.env.TOKEN)
   }
