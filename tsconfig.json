@@ -13,11 +13,7 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "Node",
     "esModuleInterop": true,
-    "lib": [
-    "ES5",
-    "ES2015",
-    "DOM",
-    "ScriptHost"]
+    "lib": ["ES5", "ES2015", "DOM", "ScriptHost"]
   },
   "exclude": ["node_modules", "tests", "examples"]
 }

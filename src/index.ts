@@ -1,21 +1,22 @@
-import 'reflect-metadata'
-import { addColors } from 'winston'
-import { Client, DIService } from 'discordx'
-import { Intents, Interaction } from 'discord.js'
-import { importx, dirname } from '@discordx/importer'
-import { config } from 'dotenv'
-import { Logger, transports, format, createLogger } from 'winston'
-import { Beans } from './DI/Beans'
-import { DATE, INTEGER, NOW, Sequelize, STRING } from 'sequelize'
-import { container } from 'tsyringe'
-config()
+import "reflect-metadata";
+import { addColors } from "winston";
+import { Client, DIService } from "discordx";
+import { Intents, Interaction } from "discord.js";
+import { importx, dirname } from "@discordx/importer";
+import { config } from "dotenv";
+import { Logger, transports, format, createLogger } from "winston";
+import { Beans } from "./DI/Beans";
+import { DATE, INTEGER, NOW, Sequelize, STRING } from "sequelize";
+import { container } from "tsyringe";
+
+config();
 
 export default class Bot {
-  private static client: Client
-  private static logger: Logger
-  private static guildInvites = new Map()
+  private static client: Client;
+  private static logger: Logger;
+  private static guildInvites = new Map();
   static get Client(): Client {
-    return this.client
+    return this.client;
   }
 
   static async start(): Promise<void> {
@@ -27,17 +28,17 @@ export default class Bot {
       modwarn: 4,
       modinfo: 5,
       debug: 6,
-    }
+    };
 
     addColors({
-      error: 'red',
-      warn: 'yellow',
-      info: 'green',
-      modules: 'cyan',
-      modwarn: 'yellow',
-      modinfo: 'green',
-      debug: 'blue',
-    })
+      error: "red",
+      warn: "yellow",
+      info: "green",
+      modules: "cyan",
+      modwarn: "yellow",
+      modinfo: "green",
+      debug: "blue",
+    });
 
     this.logger = createLogger({
       levels: logLevels,
@@ -54,26 +55,26 @@ export default class Bot {
           (info) => `${info.timestamp} ${info.level}:${info.message}`
         )
       ),
-      level: 'debug',
-    })
+      level: "debug",
+    });
 
-    const { DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME } = process.env
+    const { DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME } = process.env;
 
     const sequelize = new Sequelize(
       `postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}`,
       {
         logging: false,
       }
-    )
+    );
 
     try {
-      await sequelize.authenticate()
-      Bot.logger.info('Database connection has been established successfully.')
+      await sequelize.authenticate();
+      Bot.logger.info("Database connection has been established successfully.");
     } catch (error) {
-      Bot.logger.error('Unable to connect to the database:', error)
+      Bot.logger.error("Unable to connect to the database:", error);
     }
 
-    const invites = sequelize.define('invites', {
+    const invites = sequelize.define("invites", {
       user_id: STRING,
       inviter_id: STRING,
       invites: INTEGER,
@@ -91,8 +92,21 @@ export default class Bot {
         primaryKey: true,
         autoIncrement: true,
       },
-    })
-    invites.sync()
+    });
+
+    invites.sync();
+
+    DIService.container = container;
+    container.registerInstance(Beans.Logger, this.logger);
+    container.registerInstance(Client, this.client);
+    container.registerInstance(Beans.Invites, invites);
+    container.registerInstance(Beans.GuildInvites, this.guildInvites);
+
+    DIService.container = container;
+    container.registerInstance(Beans.Logger, this.logger);
+    container.registerInstance(Client, this.client);
+    container.registerInstance(Beans.Invites, invites);
+    container.registerInstance(Beans.GuildInvites, this.guildInvites);
 
     this.client = new Client({
       botGuilds: [(client) => client.guilds.cache.map((guild) => guild.id)],
@@ -101,33 +115,27 @@ export default class Bot {
         Intents.FLAGS.GUILD_MESSAGES,
         Intents.FLAGS.GUILD_MEMBERS,
       ],
-    })
+    });
 
-    this.client.once('ready', async () => {
+    this.client.once("ready", async () => {
       await this.client.initApplicationCommands({
         guild: { log: false },
-      })
-      await this.client.initApplicationPermissions(true)
-    })
+      });
+      await this.client.initApplicationPermissions(true);
+    });
 
-    this.client.on('interactionCreate', (interaction: Interaction) => {
-      this.client.executeInteraction(interaction)
-    })
+    this.client.on("interactionCreate", (interaction: Interaction) => {
+      this.client.executeInteraction(interaction);
+    });
 
-    await importx(dirname(import.meta.url) + '/{events,commands}/**/*.{ts,js}')
+    await importx(dirname(import.meta.url) + "/{events,commands}/**/*.{ts,js}");
     if (!process.env.TOKEN) {
-      throw Error('Could not find TOKEN in your environment')
+      throw Error("Could not find TOKEN in your environment");
     }
-    Bot.logger.info('Connecting...')
+    Bot.logger.info("Connecting...");
 
-    DIService.container = container
-    container.registerInstance(Beans.Logger, this.logger)
-    container.registerInstance(Client, this.client)
-    container.registerInstance(Beans.Invites, invites)
-    container.registerInstance(Beans.GuildInvites, this.guildInvites)
-
-    await this.client.login(process.env.TOKEN)
+    await this.client.login(process.env.TOKEN);
   }
 }
 
-Bot.start()
+Bot.start();

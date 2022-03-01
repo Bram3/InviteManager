@@ -1,9 +1,9 @@
-import { CommandInteraction, MessageEmbed } from 'discord.js'
-import { GuardFunction } from 'discordx'
-import { container } from 'tsyringe'
-import { Logger } from 'winston'
-import config from '../config'
-import { Beans } from '../DI/Beans'
+import { CommandInteraction, MessageEmbed } from "discord.js";
+import { GuardFunction } from "discordx";
+import { container } from "tsyringe";
+import { Logger } from "winston";
+import config from "../config";
+import { Beans } from "../DI/Beans";
 
 export const CommandErrorHandler: GuardFunction<CommandInteraction> = async (
   interaction,
@@ -18,18 +18,18 @@ export const CommandErrorHandler: GuardFunction<CommandInteraction> = async (
       })
       .setTimestamp()
       .setColor(config.colors.error as [number, number, number])
-      .setDescription(description)
+      .setDescription(description);
   }
   try {
-    await next()
+    await next();
   } catch (err) {
-    const logger: Logger = container.resolve(Beans.Logger)
+    const logger: Logger = container.resolve(Beans.Logger);
 
     interaction.reply({
-      embeds: [errorEmbed('There was an error executing this command.')],
-    })
+      embeds: [errorEmbed("There was an error executing this command.")],
+    });
     logger.error(
       `There was an error executing ${interaction.commandName} in ${interaction.guild?.name}. ${err}`
-    )
+    );
   }
-}
+};
