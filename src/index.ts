@@ -102,12 +102,6 @@ export default class Bot {
     container.registerInstance(Beans.Invites, invites);
     container.registerInstance(Beans.GuildInvites, this.guildInvites);
 
-    DIService.container = container;
-    container.registerInstance(Beans.Logger, this.logger);
-    container.registerInstance(Client, this.client);
-    container.registerInstance(Beans.Invites, invites);
-    container.registerInstance(Beans.GuildInvites, this.guildInvites);
-
     this.client = new Client({
       botGuilds: [(client) => client.guilds.cache.map((guild) => guild.id)],
       intents: [

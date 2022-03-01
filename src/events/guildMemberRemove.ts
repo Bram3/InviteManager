@@ -22,7 +22,7 @@ export class AppDiscord {
   ]: ArgsOf<"guildMemberAdd">): Promise<unknown> {
     if (member.user.bot)
       return this.logger.info(
-        `${member.displayName} left ${member.guild.name} (Invited by: unkown) `
+        `${member.displayName} left ${member.guild.name} (Invited by: unknown) `
       );
     let user = await this.invites.findOne({
       where: { user_id: member.id, guild_id: member.guild.id },
