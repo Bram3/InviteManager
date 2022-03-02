@@ -93,7 +93,6 @@ export default class Bot {
 
     DIService.container = container;
     container.registerInstance(Beans.Logger, this.logger);
-    container.registerInstance(Client, this.client);
     container.registerInstance(Beans.Invites, invites);
     container.registerInstance(Beans.GuildInvites, this.guildInvites);
 
@@ -112,6 +111,8 @@ export default class Bot {
     this.client.on('interactionCreate', (interaction: Interaction) => {
       this.client.executeInteraction(interaction);
     });
+    
+    container.registerInstance(Client, this.client);
 
     await importx(dirname(import.meta.url) + '/{events,commands}/**/*.{ts,js}');
     if (!process.env.TOKEN) {
