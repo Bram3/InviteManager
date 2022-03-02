@@ -13,7 +13,7 @@ import {InvitesDAO} from '../DAO/invitesDAO'
 })
 @SlashGroup('invites')
 @Guard(CommandErrorHandler)
-export class AppDiscord {
+export class Invites {
   constructor(
     @inject(Client) private client: Client,
     @inject(InvitesDAO) private invitesDAO: InvitesDAO,

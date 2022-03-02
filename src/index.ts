@@ -6,7 +6,6 @@ import {importx, dirname} from '@discordx/importer'
 import {config} from 'dotenv'
 import {Logger, transports, format, createLogger} from 'winston'
 import {Beans} from './DI/Beans'
-import {DATE, INTEGER, NOW, Sequelize, STRING} from 'sequelize'
 import {container} from 'tsyringe'
 import { InvitesDAO } from './DAO/invitesDAO'
 
@@ -59,45 +58,8 @@ export default class Bot {
       level: 'debug',
     })
 
-    const {DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME} = process.env
-
-    const sequelize = new Sequelize(`postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
-      logging: false,
-    })
-
-    try {
-      await sequelize.authenticate()
-      Bot.logger.info('Database connection has been established successfully.')
-    } catch (error) {
-      Bot.logger.error('Unable to connect to the database:', error)
-    }
-
-    const invites = sequelize.define('invites', {
-      user_id: STRING,
-      inviter_id: STRING,
-      invites: INTEGER,
-      guild_id: STRING,
-      createdAt: {
-        type: DATE,
-        defaultValue: NOW,
-      },
-      updatedAt: {
-        type: DATE,
-        defaultValue: NOW,
-      },
-      id: {
-        type: INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-      },
-    })
-
-    invites.sync()
-
-
     DIService.container = container
     container.registerInstance(Beans.Logger, this.logger)
-    container.registerInstance(Beans.Invites, invites)
     container.registerInstance(Beans.GuildInvites, this.guildInvites)
 
     this.invitesDAO = container.resolve(InvitesDAO)

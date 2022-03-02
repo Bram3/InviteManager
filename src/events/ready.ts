@@ -9,7 +9,7 @@ import {EventErrorHandler} from '../guards/eventError';
 
 @Discord()
 @injectable()
-export class AppDiscord {
+export class Ready {
   constructor(
     @inject(Beans.Logger) private logger: Logger,
     @inject(Beans.GuildInvites)

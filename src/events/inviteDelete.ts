@@ -8,7 +8,7 @@ import {EventErrorHandler} from '../guards/eventError';
 
 @Discord()
 @injectable()
-export class AppDiscord {
+export class InviteDelete {
   constructor(
     @inject(Beans.Logger) private logger: Logger,
     @inject(Client) private client: Client,

@@ -8,7 +8,7 @@ import {CommandErrorHandler} from '../guards/commandError'
 @Discord()
 @injectable()
 @Guard(CommandErrorHandler)
-export class AppDiscord {
+export class Uptime {
   constructor(@inject(Client) private client: Client) {}
 
   @Slash('uptime', {description: 'Sends the uptime of the bot.'})
