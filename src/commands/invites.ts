@@ -1,12 +1,12 @@
-import {CommandInteraction, GuildMember, MessageEmbed, User} from 'discord.js';
-import {Client, Discord, Guard, Slash, SlashGroup, SlashOption} from 'discordx';
-import {ModelStatic} from 'sequelize/types';
-import {inject, injectable} from 'tsyringe';
-import {Beans} from '../DI/Beans';
-import config from '../config';
-import {CommandErrorHandler} from '../guards/commandError';
+import {CommandInteraction, GuildMember, MessageEmbed, User} from 'discord.js'
+import {Client, Discord, Guard, Slash, SlashGroup, SlashOption} from 'discordx'
+import {inject, injectable} from 'tsyringe'
+import config from '../config'
+import {CommandErrorHandler} from '../guards/commandError'
+import {InvitesDAO} from '../DAO/invitesDAO'
 
 @Discord()
+@injectable()
 @SlashGroup({
   name: 'invites',
   description: 'Lets you add, remove, reset, or see invites.',
@@ -14,7 +14,10 @@ import {CommandErrorHandler} from '../guards/commandError';
 @SlashGroup('invites')
 @Guard(CommandErrorHandler)
 export class AppDiscord {
-  constructor(@inject(Beans.Invites) private invites: ModelStatic<any>, @inject(Client) private client: Client) {}
+  constructor(
+    @inject(Client) private client: Client,
+    @inject(InvitesDAO) private invitesDAO: InvitesDAO,
+  ) {}
 
   private mainEmbed(description: string): MessageEmbed {
     return new MessageEmbed()
@@ -24,7 +27,7 @@ export class AppDiscord {
       })
       .setTimestamp()
       .setColor(config.colors.main as [number, number, number])
-      .setDescription(description);
+      .setDescription(description)
   }
 
   private errorEmbed(description: string): MessageEmbed {
@@ -35,25 +38,25 @@ export class AppDiscord {
       })
       .setTimestamp()
       .setColor(config.colors.error as [number, number, number])
-      .setDescription(description);
+      .setDescription(description)
   }
 
   private getInteractionCaller(interaction: CommandInteraction): GuildMember | null {
-    const {member} = interaction;
+    const {member} = interaction
     if (member == null) {
-      throw new Error('Unable to extract member');
+      throw new Error('Unable to extract member')
     }
     if (member instanceof GuildMember) {
-      return member;
+      return member
     }
-    return null;
+    return null
   }
 
   private async hasPermission(interaction: CommandInteraction): Promise<boolean> {
-    const member = this.getInteractionCaller(interaction);
-    if (member == null) return false;
-    if (!member.roles.cache.some(role => role.id == config.manageInvitesRoleId)) return false;
-    return true;
+    const member = this.getInteractionCaller(interaction)
+    if (member == null) return false
+    if (!member.roles.cache.some(role => role.id == config.manageInvitesRoleId)) return false
+    return true
   }
 
   @Slash('show', {
@@ -70,22 +73,15 @@ export class AppDiscord {
     interaction: CommandInteraction,
   ): Promise<void> {
     if (member == undefined) {
-      const newMember = await interaction.guild?.members.fetch(interaction.member!.user.id);
+      const newMember = await interaction.guild?.members.fetch(interaction.member!.user.id)
       if (newMember != undefined) {
-        member = newMember;
+        member = newMember
       }
     }
-    let foc = await this.invites.findOrCreate({
-      where: {user_id: member.id, guild_id: interaction.guild?.id},
-      defaults: {
-        user_id: member.id,
-        invites: 0,
-        guild_id: interaction.guild?.id,
-      },
-    });
+    const foc = await this.invitesDAO.findById(member.id, interaction.guild!.id)
     interaction.reply({
       embeds: [this.mainEmbed(`${member.toString()} has **${foc[0].invites ? foc[0].invites : '0'}** invites!`)],
-    });
+    })
   }
 
   @Slash('add', {description: 'Add invites to a member.'})
@@ -104,23 +100,16 @@ export class AppDiscord {
     if (!this.hasPermission(interaction)) {
       return interaction.reply({
         embeds: [this.errorEmbed("You don't have permission to use this command!")],
-      });
+      })
     }
 
-    let foc = await this.invites.findOrCreate({
-      where: {user_id: member.id, guild_id: interaction.guild!.id},
-      defaults: {
-        user_id: member.id,
-        invites: 0,
-        guild_id: interaction.guild!.id,
-      },
-    });
-    await foc[0].increment('invites', {by: amount});
+    const foc = await this.invitesDAO.findById(member.id, interaction.guild!.id)
+    await foc[0].increment('invites', {by: amount})
     return interaction.reply({
       embeds: [
-        this.mainEmbed(`Added ${amount} invites to ${member.toString()}! They now have ${foc[0].invites} invites!`),
+        this.mainEmbed(`Added ${amount} invites to ${member.toString()}! They now have **${foc[0].invites}** invites!`),
       ],
-    });
+    })
   }
 
   @Slash('remove', {description: 'Remove invites from a member.'})
@@ -139,29 +128,22 @@ export class AppDiscord {
     if (!this.hasPermission(interaction)) {
       return interaction.reply({
         embeds: [this.errorEmbed("You don't have permission to use this command!")],
-      });
+      })
     }
 
-    let foc = await this.invites.findOrCreate({
-      where: {user_id: member.id, guild_id: interaction.guild!.id},
-      defaults: {
-        user_id: member.id,
-        invites: 0,
-        guild_id: interaction.guild!.id,
-      },
-    });
-    if ((await foc[0].invites) - amount < 0) {
+    const foc = await this.invitesDAO.findById(member.id, interaction.guild!.id)
+    if (foc[0].invites - amount < 0) {
       return interaction.reply({
         embeds: [this.errorEmbed('You cannot make someone have negative invites!')],
-      });
+      })
     }
-    await foc[0].decrement('invites', {by: amount});
+    await foc[0].decrement('invites', {by: amount})
 
     return interaction.reply({
       embeds: [
-        this.mainEmbed(`Removed ${amount} invites from ${member.toString()}! They now have ${foc[0].invites} invites!`),
+        this.mainEmbed(`Removed ${amount} invites from ${member.toString()}! They now have **${foc[0].invites}** invites!`),
       ],
-    });
+    })
   }
 
   @Slash('reset', {
@@ -180,26 +162,20 @@ export class AppDiscord {
     if (!this.hasPermission(interaction)) {
       return interaction.reply({
         embeds: [this.errorEmbed("You don't have permission to use this command!")],
-      });
+      })
     }
-    let foc = await this.invites.findOrCreate({
-      where: {user_id: member.id, guild_id: interaction.guild!.id},
-      defaults: {
-        user_id: member.id,
-        invites: 0,
-        guild_id: interaction.guild!.id,
-      },
-    });
+
+    const foc = await this.invitesDAO.findById(member.id, interaction.guild!.id)
 
     if (!foc[0].invites)
       return interaction.reply({
-        embeds: [this.mainEmbed('`Successfully removed all invites from ${member.toString()}!`')],
-      });
-    foc[0].decrement('invites', {by: foc[0].invites});
+        embeds: [this.mainEmbed(`Successfully removed all invites from ${member.toString()}!`)],
+      })
+    foc[0].decrement('invites', {by: foc[0].invites})
 
     return interaction.reply({
       embeds: [this.mainEmbed(`Successfully removed all invites from ${member.toString()}!`)],
-    });
+    })
   }
 
   @Slash('leaderboard', {
@@ -207,29 +183,25 @@ export class AppDiscord {
   })
   @SlashGroup('invites')
   async leaderboard(interaction: CommandInteraction) {
-    const all = await this.invites.findAll({
-      order: [['invites', 'DESC']],
-      limit: 10,
-      where: {guild_id: interaction.guild!.id},
-    });
+    const all = await this.invitesDAO.findTopTen(interaction.guild!.id)
 
-    let LB: any[] = [];
-    let i = 0;
+    let LB: any[] = []
+    let i = 0
     await Promise.all(
       all.map(async entry => {
-        if (!entry.invites) return;
-        let user = await this.client.users.fetch(entry.user_id);
-        i++;
-        LB.push(`${i}. **${user.username}**#${user.discriminator} - ${entry.invites}`);
+        if (!entry.invites) return
+        let user = await this.client.users.fetch(entry.user_id)
+        i++
+        LB.push(`${i}. **${user.username}**#${user.discriminator} - ${entry.invites}`)
       }),
-    );
+    )
 
-    let embed;
+    let embed
     if (LB.length === 0) {
-      embed = this.mainEmbed('No one in this server has any invites!');
+      embed = this.mainEmbed('No one in this server has any invites!')
     } else {
-      embed = this.mainEmbed(`Here are the top ${LB.length} inviters!\n${LB.join('\n')}`);
+      embed = this.mainEmbed(`Here are the top ${LB.length} inviters!\n${LB.join('\n')}`)
     }
-    return interaction.reply({embeds: [embed]});
+    return interaction.reply({embeds: [embed]})
   }
 }

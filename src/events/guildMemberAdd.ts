@@ -1,10 +1,10 @@
 import {Invite, Vanity, MessageEmbed, TextChannel} from 'discord.js';
 import {ArgsOf, Client, Guard} from 'discordx';
 import {Discord, On} from 'discordx';
-import {ModelStatic} from 'sequelize/types';
 import {inject, injectable} from 'tsyringe';
 import {Logger} from 'winston';
 import config from '../config';
+import { InvitesDAO } from '../DAO/invitesDAO';
 import {Beans} from '../DI/Beans';
 import {EventErrorHandler} from '../guards/eventError';
 
@@ -16,7 +16,7 @@ export class AppDiscord {
     @inject(Client) private client: Client,
     @inject(Beans.GuildInvites)
     private guildInvites: Map<string, Invite | Vanity>,
-    @inject(Beans.Invites) private invites: ModelStatic<any>,
+    @inject(InvitesDAO) private invitesDAO: InvitesDAO
   ) {}
 
   private mainEmbed(description: string): MessageEmbed {
@@ -92,32 +92,12 @@ export class AppDiscord {
           ],
         });
       }
-      await this.invites.findOrCreate({
-        where: {user_id: member.id, guildID: member.guild.id},
-        defaults: {
-          inviter_id: 'VANITY',
-          user_id: member.id,
-          guild_id: member.guild.id,
-        },
-      });
+      await this.invitesDAO.findById(member.id, member.guild.id, 'VANITY')
       return;
     }
-    let foc = await this.invites.findOrCreate({
-      where: {user_id: usedInvite.inviter.id, guild_id: member.guild.id},
-      defaults: {
-        user_id: usedInvite.inviter.id,
-        invites: 0,
-        guild_id: member.guild.id,
-      },
-    });
-    await this.invites.findOrCreate({
-      where: {user_id: member.id, guild_id: member.guild.id},
-      defaults: {
-        inviter_id: usedInvite.inviter.id,
-        user_id: member.id,
-        guild_id: member.guild.id,
-      },
-    });
+    const foc = await this.invitesDAO.findById(usedInvite.inviter.id, member.guild.id)
+    await this.invitesDAO.findById(member.id, member.guild.id, usedInvite.inviter.id)
+
     await foc[0].increment('invites');
 
     this.logger.info(

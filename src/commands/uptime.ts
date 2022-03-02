@@ -1,9 +1,9 @@
-import {CommandInteraction, MessageEmbed} from 'discord.js';
-import {Client, Discord, Guard, Slash} from 'discordx';
-import {inject, injectable} from 'tsyringe';
-import config from '../config';
-import ms from 'ms';
-import {CommandErrorHandler} from '../guards/commandError';
+import {CommandInteraction, MessageEmbed} from 'discord.js'
+import {Client, Discord, Guard, Slash} from 'discordx'
+import {inject, injectable} from 'tsyringe'
+import config from '../config'
+import ms from 'ms'
+import {CommandErrorHandler} from '../guards/commandError'
 
 @Discord()
 @injectable()
@@ -20,7 +20,7 @@ export class AppDiscord {
         text: this.client.user!!.username,
         iconURL: this.client.user!!.displayAvatarURL(),
       })
-      .setTimestamp();
-    interaction.reply({embeds: [embed]});
+      .setTimestamp()
+    interaction.reply({embeds: [embed]})
   }
 }
